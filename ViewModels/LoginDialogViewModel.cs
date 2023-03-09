@@ -60,7 +60,7 @@ namespace NovinDevHubStaffCore.ViewModels
             var response = await authService.Authenticate(new LoginRequest
             {
                 client_id = "user-service",
-                client_secret = "564e6446-1733-4763-a20a-0d97c56b991b",
+                client_secret = Constants.CLIENT_SECRET,
                 grant_type = "password",
                 username = this.Username,
                 password = this.Password,
