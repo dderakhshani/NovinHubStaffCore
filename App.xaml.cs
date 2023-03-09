@@ -20,7 +20,8 @@ namespace NovinDevHubStaffCore
     /// </summary>
     public partial class App : Application
     {
-
+        const string LOGIN_BASE_URL= "https://kc.novin.dev/";
+        const string API_BASE_URL = "https://lb.novin-dev.com";
         public App()
         {
             Services = ConfigureServices();
@@ -54,7 +55,7 @@ namespace NovinDevHubStaffCore
            
             services.AddSingleton<ISettingsService, SettingsService>();
             //-----------------Auth Service-----------------------
-            services.AddSingleton(RestService.For<IAuthService>("https://kc.novin.dev/", retfitSetting));
+            services.AddSingleton(RestService.For<IAuthService>(LOGIN_BASE_URL, retfitSetting));
             var authTokenStore = new AuthTokenStore();
             services.AddSingleton<IAuthTokenStore, AuthTokenStore>();
 
@@ -62,8 +63,9 @@ namespace NovinDevHubStaffCore
             //-----------------Task/Project Service-----------------------
             var httpProjectClient = new HttpClient(new AuthHeaderHandler(authTokenStore))
             {
-                BaseAddress = new Uri("https://lb.novin-dev.com/task"), 
-                 
+                BaseAddress = new Uri($"{API_BASE_URL}/task"), 
+
+
             };
             httpProjectClient.DefaultRequestHeaders.Add("apikey", "ZH4KP8HxzhupxNwUVrpk3drSERWZe9RJ");
             httpProjectClient.DefaultRequestHeaders.Add("realm", "nhc");
@@ -74,7 +76,7 @@ namespace NovinDevHubStaffCore
             //-----------------Sync Service-----------------------
             var httpSyncClient = new HttpClient(new HttpLoggingHandler(authTokenStore))
             {
-                BaseAddress = new Uri("https://lb.novin-dev.com/hubstaff"),
+                BaseAddress = new Uri($"{API_BASE_URL}/hubstaff"),
             };
             httpSyncClient.DefaultRequestHeaders.Add("realm", "nhc");
             services.AddSingleton(RestService.For<IApplicationService>(httpSyncClient, retfitSetting));
@@ -84,7 +86,7 @@ namespace NovinDevHubStaffCore
 
             var httpFileClient = new HttpClient(new HttpLoggingHandler(authTokenStore))
             {
-                BaseAddress = new Uri("https://lb.novin-dev.com"),
+                BaseAddress = new Uri(API_BASE_URL),
             };
             services.AddSingleton(RestService.For<IFileService>(httpFileClient, retfitSetting));
 
