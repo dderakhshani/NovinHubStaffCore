@@ -1,0 +1,529 @@
+﻿<Window x:Class="NovinDevHubStaffCore.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:NovinDevHubStaffCore"
+        xmlns:converters="clr-namespace:NovinDevHubStaffCore.Core.Converters"
+        xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        x:Name="MainPage"
+      Title="MainWindow" Height="650" Width="800"  >
+    <Window.Resources>
+        <TransformGroup x:Key="TwoXScaler">
+            <ScaleTransform ScaleX="2" ScaleY="2"/>
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform/>
+        </TransformGroup>
+        <TransformGroup x:Key="HalfXScaler">
+            
+            <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform X="-6" Y="-3"/>
+        </TransformGroup>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" 
+            True="Visible" 
+            False="Collapsed" />
+        <converters:InverseBooleanConverter  x:Key="InverseBool"></converters:InverseBooleanConverter>
+
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVisInverse" 
+            True="Collapsed" 
+            False="Visible" />
+
+    </Window.Resources>
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="25"></ColumnDefinition>
+                            <ColumnDefinition Width="25"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock Text="{Binding Status}" Foreground="DarkGray" Margin="10,0,0,0"  ></TextBlock>
+
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="1">
+                <Button  x:Name="btnFullscreen" 
+                       Style="{DynamicResource MaterialDesignFlatButton}"
+                        HorizontalAlignment="Left" Padding="0,0"  VerticalAlignment="Top" Height="20" Width="24" Click="btnFullscreen_Click"  >
+                    <materialDesign:PackIcon x:Name="btnFullScreenIcon" 
+                                              Foreground="SlateGray"
+                                             Kind="Fullscreen"
+                                             RenderTransform="{StaticResource HalfXScaler}"/>
+                </Button>
+
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="2">
+                <Button  x:Name="btnExpandWindow" 
+                       Style="{DynamicResource MaterialDesignFlatButton}"
+                        HorizontalAlignment="Left" Padding="0,0" Click="btnExpandWindow_Click" VerticalAlignment="Top" Height="20" Width="24"  >
+                    <materialDesign:PackIcon x:Name="btnExpandWindowIcon" 
+                                              Foreground="SlateGray"
+                                             Kind="ChevronDoubleRight"
+                                             RenderTransform="{StaticResource HalfXScaler}"/>
+                </Button>
+
+            </StatusBarItem>
+        </StatusBar>
+        <Grid Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid  Margin="0,0,0,0" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Button x:Name="btnLogin" 
+                        Style="{DynamicResource MaterialDesignFlatButton}" 
+                        Command="{Binding LoginCommand}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisInverse} }" 
+                        HorizontalAlignment="Left" Padding="4,2"  >
+                    <materialDesign:PackIcon Kind="AccountKeyOutline"/>
+                </Button>
+                <Button 
+                        Style="{DynamicResource MaterialDesignFlatButton}" 
+                        Command="{Binding LogoutCommand}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVis} }" 
+                        HorizontalAlignment="Left" Padding="4,2"  >
+                    <materialDesign:PackIcon Kind="LogoutVariant"/>
+                </Button>
+
+                <Label Content="{Binding ActiveTask.TotalDurationSeconds,FallbackValue='00:00:00', StringFormat={}{0:hh':'mm':'ss}}" HorizontalAlignment="Center" VerticalAlignment="Center"
+               HorizontalContentAlignment="Center"
+               Foreground="White"  Width="126" Height="29" FontWeight="Bold" FontSize="16">
+                    <Label.Style>
+                        <Style TargetType="{x:Type Label}">
+                            <Setter Property="Background" Value="Black"/>
+                            <Style.Triggers>
+
+                                <DataTrigger Binding="{Binding IsStarted}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+
+                <Label Content="{Binding ActiveTask.Project.Title,FallbackValue='My Project'}" HorizontalAlignment="Center" Margin="0,0,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="18" FontWeight="Bold"/>
+                <Label Content="{Binding ActiveTask.Title,FallbackValue='My Task'}" HorizontalAlignment="Center" Margin="0,30.2,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+
+                <Grid Grid.Row="2" Margin="0,30,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="5*"/>
+                    </Grid.ColumnDefinitions>
+                    <Line Stretch="Fill" Stroke="{DynamicResource SeperatorColor}" X2="1" Grid.Column="0" VerticalAlignment="Top"/>
+                    <Line Stretch="Fill" Stroke="{DynamicResource SeperatorColor}" Y2="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                    <Line Stretch="Fill" Stroke="{DynamicResource SeperatorColor}" X2="1" Grid.Column="1" VerticalAlignment="Top"/>
+                    <TextBlock Foreground="DarkGray" Text="No limit" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                    <TextBlock Foreground="DarkGray" Text="{Binding TotalDurationSeconds, StringFormat={}{0:hh':'mm':'ss}}"  Grid.Column="1"  HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+
+                </Grid>
+                <Button  HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="2" Width="50"
+                         Height="50" Template="{DynamicResource PlayButtonTemplate}"
+                         Command="{Binding StartStopCommand}">
+                    <StackPanel>
+                        <materialDesign:PackIcon RenderTransform="{DynamicResource TwoXScaler}" Kind="PlayCircleOutline" Foreground="White" 
+                                                 RenderTransformOrigin="0.5,0.5"
+                                                  Visibility="{Binding IsStarted, Converter={StaticResource BoolToVisInverse} }" 
+                                                 >
+
+                        </materialDesign:PackIcon>
+                        <materialDesign:PackIcon RenderTransform="{DynamicResource TwoXScaler}"
+                            Kind="StopCircleOutline" Foreground="White" RenderTransformOrigin="0.5,0.5"
+                                                 Visibility="{Binding IsStarted, Converter={StaticResource BoolToVis} }">
+
+                        </materialDesign:PackIcon>
+                    </StackPanel>
+
+
+
+                </Button>
+
+                <Border BorderBrush="#FFC9C9C9"
+            BorderThickness="1"
+            VerticalAlignment="Center"
+            CornerRadius="0"
+                Grid.Row="3" Margin="10,0">
+
+                    <DockPanel  Margin="5" LastChildFill="True">
+                        <materialDesign:PackIcon Kind="Magnify" Height="18"   DockPanel.Dock="Left" Margin="0,5,0,0" Foreground="#FF949494"/>
+
+                        <Grid>
+                            <TextBox x:Name="SearchProjectTextBox"  Margin="3 0 0 0" 
+                                     Text="{Binding SearchProjectTerm, UpdateSourceTrigger=PropertyChanged}"
+                                     BorderThickness="0">
+
+                            </TextBox>
+                            <TextBlock IsHitTestVisible="False" Text="Search projects" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchProjectTextBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                    </DockPanel >
+
+
+
+
+                </Border>
+
+                <Grid Background="{DynamicResource SeperatorColor}" Height="45" Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                        <ColumnDefinition Width="50"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Company" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold" FontSize="14"></TextBlock>
+                    <Button HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="2" Width="25"
+                            Height="25" Template="{DynamicResource PlayButtonTemplate}">
+                        <materialDesign:PackIcon Kind="Plus" Height="18"    Foreground="White"/>
+
+                    </Button>
+                </Grid>
+
+                <ListView x:Name="projectList" ItemsSource="{Binding Projects}"  
+                          Grid.Row="5" Height="Auto">
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+
+                        </Style>
+                    </ListView.Resources>
+
+                    <ListView.View>
+                        <GridView>
+                            <GridView.ColumnHeaderContainerStyle>
+                                <Style>
+                                    <Setter Property="FrameworkElement.Visibility" Value="Collapsed"/>
+                                </Style>
+                            </GridView.ColumnHeaderContainerStyle>
+                            <GridViewColumn  Width="40">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate x:Name="projectItemContainer">
+                                        <Button HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Width="25"
+                                             
+                                                Height="25" Template="{DynamicResource PlayButtonTemplate}">
+                                            <StackPanel>
+                                                <materialDesign:PackIcon  Kind="Play" Height="18" Foreground="White"
+                                                  Visibility="{Binding IsActive, Converter={StaticResource BoolToVisInverse} }" 
+                                                 >
+
+                                                </materialDesign:PackIcon>
+                                                <materialDesign:PackIcon Kind="Stop" Height="18"    Foreground="White"
+                                                 Visibility="{Binding IsActive, Converter={StaticResource BoolToVis} }">
+
+                                                </materialDesign:PackIcon>
+                                            </StackPanel>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="275"
+                                />
+
+                            <GridViewColumn Header="Duration" DisplayMemberBinding="{Binding TotalDurationSeconds, StringFormat=\{0:hh\\:mm\}}" 
+                                />
+
+                        </GridView>
+                    </ListView.View>
+
+                    <Behaviors:Interaction.Triggers>
+                        <Behaviors:EventTrigger EventName="SelectionChanged">
+                            <Behaviors:InvokeCommandAction Command="{Binding SelectProjectCommand}"  
+                                                    CommandParameter="{Binding ElementName=projectList, Path=SelectedItem}"/>
+                        </Behaviors:EventTrigger>
+                    </Behaviors:Interaction.Triggers>
+                </ListView>
+
+                <!--<ItemsControl Grid.Row="5" Height="Auto"  ItemsSource="{Binding Path=Projects}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,5" Height="45" x:Name="projectItemContainer" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="70" />
+                                </Grid.ColumnDefinitions>
+                                <Button HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Width="25"
+                                        DataContext="{Binding ElementName=MainPage , Path=DataContext }"
+                                        Command="{Binding SelectProjectCommand}"
+                                        CommandParameter="{Binding ElementName=projectItemContainer,Path=DataContext}"
+                                        Height="25" Template="{DynamicResource PlayButtonTemplate}">
+                                   
+                                    <StackPanel>
+                                        <materialDesign:PackIcon  Kind="Play" Height="18" Foreground="White"
+                                                  Visibility="{Binding IsActive, Converter={StaticResource BoolToVisInverse} }" 
+                                                 >
+
+                                        </materialDesign:PackIcon>
+                                        <materialDesign:PackIcon Kind="Stop" Height="18"    Foreground="White"
+                                                 Visibility="{Binding IsActive, Converter={StaticResource BoolToVis} }">
+
+                                        </materialDesign:PackIcon>
+                                    </StackPanel>
+                                </Button>
+                                <TextBlock Text="{Binding Title}" Grid.Column="1" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Duration}" Grid.Column="2"  VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" />
+                                <Line Stretch="Fill" Stroke="{DynamicResource SeperatorColor}" X2="1" Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                    <Setter Property="Background" Value="#FFC4DFFB" TargetName="projectItemContainer"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>-->
+            </Grid>
+            <Grid x:Name="taskArea" Grid.Column="1" Margin="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+
+                <Line Stretch="Fill" Stroke="{DynamicResource SeperatorColor}" Y2="1" Grid.RowSpan="4" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                <StackPanel Margin="10">
+                    <TextBlock Text="To-Dos" FontWeight="Bold" FontSize="16"></TextBlock>
+                    <TextBlock Text="{Binding SelectedProject.Title,FallbackValue='My Project'}" Margin="0,5,0,0"></TextBlock>
+                </StackPanel>
+
+                <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+
+                <Grid Grid.Row="1" x:Name="filterArea" Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="25*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox  Style="{DynamicResource MaterialDesignFilledComboBox}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="4"/>
+
+                    <ComboBox  Style="{DynamicResource MaterialDesignFilledComboBox}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="1"  Margin="4"/>
+                    <CheckBox IsChecked="{Binding Path=ShowAllTasks, Mode=TwoWay}"
+                        Content="Show Completed"  HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="2"  Margin="4"/>
+
+                    <Border BorderBrush="#FFC9C9C9" x:Name="searchTask"
+                            BorderThickness="1"
+                            VerticalAlignment="Center"
+                            CornerRadius="0"
+                             Grid.Column="4" Margin="5">
+
+                        <DockPanel  Margin="2" LastChildFill="True">
+
+                            <Image Height="18"   DockPanel.Dock="Left">
+
+                            </Image>
+                            <Grid>
+                                <TextBox x:Name="SearchTaskTextBox" 
+                                          Text="{Binding SearchTaskTerm, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="3 0 0 0" BorderThickness="0">
+
+                                </TextBox>
+                                <TextBlock IsHitTestVisible="False" Text="Search to-dos" 
+                                           VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                           Margin="10,0,0,0" Foreground="DarkGray"
+                                           >
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=SearchTaskTextBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                        </DockPanel >
+
+
+
+
+                    </Border>
+
+                </Grid>
+
+
+                <ListView x:Name="taskList" ItemsSource="{Binding Tasks}"  
+                          Grid.Row="2">
+                    <!--<ListView.Resources>
+                        <Style TargetType="{x:Type GridView}">
+                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Style>
+                    </ListView.Resources>-->
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate x:Name="taskItemContainer">
+                                        <Button    IsEnabled="{Binding isDone, Converter={StaticResource InverseBool}}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Width="25"
+                                     
+                                        Command="{Binding  DataContext.StartStopTaskCommand, ElementName=MainPage}"
+                                        CommandParameter="{Binding}"
+                                        Height="25" Template="{DynamicResource PlayButtonTemplate}">
+                                            <StackPanel>
+                                                <materialDesign:PackIcon Kind="CheckAll" Height="25"    Foreground="White"
+                                                 Visibility="{Binding isDone, Converter={StaticResource BoolToVis} }">
+
+                                                </materialDesign:PackIcon>
+                                                <materialDesign:PackIcon  Kind="Play" Height="25" Foreground="White"
+                                                  Visibility="{Binding IsActive, Converter={StaticResource BoolToVisInverse} }" 
+                                                 >
+
+                                                </materialDesign:PackIcon>
+                                                <materialDesign:PackIcon Kind="Stop" Height="25"    Foreground="White"
+                                                 Visibility="{Binding IsActive, Converter={StaticResource BoolToVis} }">
+
+                                                </materialDesign:PackIcon>
+                                              
+                                            </StackPanel>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="TO-DO" DisplayMemberBinding="{Binding Title}" 
+                                Width="200"/>
+
+                            <GridViewColumn Header = "CREATED" DisplayMemberBinding="{Binding CreatedAt}" 
+                                />
+
+                        </GridView>
+                    </ListView.View>
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding isDone}" Value="True">
+                                    <Setter Property="Background"  Value="Red" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.Resources>
+                    <Behaviors:Interaction.Triggers>
+                        <Behaviors:EventTrigger EventName="SelectionChanged">
+                            <Behaviors:InvokeCommandAction Command="{Binding SelectedTaskChangedCommand}"  
+                                                    CommandParameter="{Binding ElementName=taskList, Path=SelectedItem}"/>
+                        </Behaviors:EventTrigger>
+                    </Behaviors:Interaction.Triggers>
+                </ListView>
+
+                <Grid x:Name="noTasks" Grid.Row="3" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80*"></RowDefinition>
+                        <RowDefinition Height="20*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Image Source="/Resources/Images/to-dos-1.png" Height="120"
+                           VerticalAlignment="Bottom"
+                           HorizontalAlignment="Center"/>
+                    <TextBlock Text="No task selected"  Grid.Row="1"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Center"/>
+
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Hidden" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTask}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                         
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                </Grid>
+                <Grid x:Name="taskDetail" Grid.Row="3" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding SelectedTask.Title}" Grid.Row="0" VerticalAlignment="Center"
+                           FontWeight="Bold" FontSize="16"></TextBlock>
+                    <Button    Command="{Binding CompleteTaskCommand}"
+                               IsEnabled="{Binding SelectedTask.isDone, Converter={StaticResource InverseBool}}"
+                               Content="Complete" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"></Button>
+
+                    <TextBlock Text="Changed:" Foreground="Gray" Grid.Row="1"></TextBlock>
+
+                    <TextBlock Text="No description"  Grid.Row="2"></TextBlock>
+
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTask}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Hidden" />
+                                </DataTrigger>
+
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                </Grid>
+
+            </Grid>
+            <!--<Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="2" Background="#660C0C0C">
+<ProgressBar IsIndeterminate="True" Margin="50" />
+            </Grid>-->
+        </Grid>
+    </DockPanel>
+
+</Window>
